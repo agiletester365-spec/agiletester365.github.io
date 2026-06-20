@@ -99,6 +99,7 @@ footer span{color:var(--pink)}
     <li><a href="#resume" style="color: rgb(170, 170, 170);">Resume</a></li>
     <li><a href="#portfolio" style="color: rgb(232, 24, 93);">Work</a></li>
     <li><a href="#contact" style="color: rgb(170, 170, 170);">Contact</a></li>
+    <li><a href="/agent/" style="color: rgb(232, 24, 93);">Agent ▸</a></li>
   </ul>
 </nav>
 <section id="hero">
@@ -249,7 +250,7 @@ footer span{color:var(--pink)}
 (function(){
   var links=document.querySelectorAll('.nav-links a');
   var sections=document.querySelectorAll('section[id]');
-  window.addEventListener('scroll',function(){var cur='';sections.forEach(function(s){if(window.scrollY>=s.offsetTop-120)cur=s.id;});links.forEach(function(l){l.style.color=l.getAttribute('href').slice(1)===cur?'#e8185d':'#aaa';});});
+  window.addEventListener('scroll',function(){var cur='';sections.forEach(function(s){if(window.scrollY>=s.offsetTop-120)cur=s.id;});links.forEach(function(l){var h=l.getAttribute('href');if(h.charAt(0)!=='#')return;l.style.color=h.slice(1)===cur?'#e8185d':'#aaa';});});
 })();
 (function(){
   var f=document.getElementById('contact-form');
