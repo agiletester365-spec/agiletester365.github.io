@@ -2,7 +2,7 @@
 
 Source for my personal portfolio website.
 
-**🌐 Live site:** https://qaintelligence.github.io/agiletester365.github.io/
+**🌐 Live site:** https://qaintelligence.github.io/
 
 ## About
 
@@ -36,4 +36,4 @@ python3 -m http.server 8000
 
 ## Contact
 
-See the contact section on the [live site](https://qaintelligence.github.io/agiletester365.github.io/).
+See the contact section on the [live site](https://qaintelligence.github.io/).
