@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>portfolio-upkeep · agent dashboard</title>
+<meta name="description" content="Live activity dashboard for the portfolio-upkeep maintenance agent across Vishal Patel's GitHub repositories." />
+<style>
+  :root{
+    --bg:#0d1117; --surface:#161b22; --surface2:#1c2230; --border:#2a313c;
+    --text:#e6edf3; --muted:#9aa7b4; --faint:#6b7785;
+    --accent:#58a6ff; --accent-bg:#10243e;
+    --green:#3fb950; --green-bg:#10261a; --amber:#d29922;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;
+    -webkit-font-smoothing:antialiased;padding:32px 20px 64px}
+  .wrap{max-width:920px;margin:0 auto}
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+  header{display:flex;align-items:center;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+  .logo{width:46px;height:46px;border-radius:10px;background:var(--accent-bg);
+    display:flex;align-items:center;justify-content:center;font-size:24px;flex:none}
+  .htitle{flex:1;min-width:200px}
+  .htitle h1{font-size:20px;font-weight:600;letter-spacing:-.01em}
+  .htitle .sub{font-family:var(--mono);font-size:12.5px;color:var(--muted)}
+  .pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:5px 12px;
+    border-radius:999px;background:var(--green-bg);color:var(--green);border:1px solid #1d4427}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:28px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .card .label{font-size:12.5px;color:var(--muted);margin-bottom:6px}
+  .card .val{font-size:23px;font-weight:600;letter-spacing:-.01em}
+  .card .meta{font-size:12px;color:var(--faint);margin-top:2px}
+
+  section{margin-bottom:30px}
+  h2{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;
+    letter-spacing:.05em;margin-bottom:14px}
+
+  .bars{display:flex;flex-direction:column;gap:10px}
+  .barrow{display:grid;grid-template-columns:200px 1fr 38px;align-items:center;gap:12px}
+  .barrow .nm{font-family:var(--mono);font-size:12.5px;color:var(--text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .track{height:10px;background:var(--surface2);border-radius:999px;overflow:hidden}
+  .fill{height:100%;background:var(--accent);border-radius:999px;transition:width .6s ease}
+  .barrow .ct{font-size:12.5px;color:var(--muted);text-align:right}
+
+  .split{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--border)}
+  .split .seg{display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;min-width:42px}
+  .seg.ai{background:var(--accent-bg);color:var(--accent)}
+  .seg.hu{background:var(--surface2);color:var(--muted)}
+  .legend{display:flex;gap:18px;margin-top:10px;font-size:12.5px;color:var(--muted)}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+
+  .feed{display:flex;flex-direction:column}
+  .item{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+  .item:last-child{border-bottom:0}
+  .item .ic{color:var(--faint);font-size:15px;flex:none;margin-top:2px;font-family:var(--mono)}
+  .item .body{flex:1;min-width:0}
+  .item .msg{font-size:14px;color:var(--text)}
+  .item .repo{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:2px}
+  .item .right{flex:none;text-align:right}
+  .item .date{font-size:12px;color:var(--faint)}
+  .badge{display:inline-block;margin-top:4px;font-size:10.5px;padding:2px 8px;border-radius:999px;
+    background:var(--accent-bg);color:var(--accent);border:1px solid #1c3a5e}
+
+  .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+  button{font-family:var(--sans);font-size:13px;color:var(--text);background:var(--surface);
+    border:1px solid var(--border);border-radius:8px;padding:8px 14px;cursor:pointer}
+  button:hover{background:var(--surface2);border-color:#3a4453}
+  .status{font-size:12.5px;color:var(--faint)}
+
+  .schedule-days{display:flex;gap:6px;margin-top:4px}
+  .day{font-size:11px;font-family:var(--mono);padding:2px 8px;border-radius:6px;
+    background:var(--surface2);color:var(--faint)}
+  .day.on{background:var(--accent-bg);color:var(--accent)}
+
+  footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);
+    font-size:12px;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .note{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:12px 16px;font-size:13px;color:var(--muted);display:none}
+  .skeleton{color:var(--faint);font-size:13px;padding:8px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="sr">Live activity dashboard for the portfolio-upkeep maintenance agent.</span>
+
+  <header>
+    <div class="logo" aria-hidden="true">🤖</div>
+    <div class="htitle">
+      <h1>portfolio-upkeep</h1>
+      <div class="sub">autonomous maintenance agent · owner: qaintelligence</div>
+      <div class="schedule-days" id="days"></div>
+    </div>
+    <span class="pill"><span class="dot"></span> Active</span>
+  </header>
+
+  <div class="toolbar">
+    <button id="refresh" type="button">↻ Refresh</button>
+    <span class="status" id="status">Loading live data…</span>
+  </div>
+
+  <div class="note" id="errnote"></div>
+
+  <div class="grid" id="metrics">
+    <div class="card"><div class="label">Next scheduled run</div><div class="val" id="m-next">—</div><div class="meta">11:00 ET · Tue / Fri / Sun</div></div>
+    <div class="card"><div class="label">Repos tracked</div><div class="val">5</div><div class="meta">rotates across all</div></div>
+    <div class="card"><div class="label">Recent commits</div><div class="val" id="m-commits">—</div><div class="meta">across tracked repos</div></div>
+    <div class="card"><div class="label">AI co-authored</div><div class="val" id="m-ai">—</div><div class="meta" id="m-ai-pct">transparent trailer</div></div>
+  </div>
+
+  <section>
+    <h2>Commit activity by repo</h2>
+    <div class="bars" id="bars"><div class="skeleton">Fetching commits…</div></div>
+  </section>
+
+  <section>
+    <h2>AI-assisted vs. human commits</h2>
+    <div class="split" id="split"><div class="seg hu" style="flex:1">—</div></div>
+    <div class="legend">
+      <span><span class="sw" style="background:#10243e;border:1px solid #1c3a5e"></span>AI co-authored (Co-Authored-By: Claude)</span>
+      <span><span class="sw" style="background:#1c2230"></span>Human-only</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Recent activity</h2>
+    <div class="feed" id="feed"><div class="skeleton">Fetching commits…</div></div>
+  </section>
+
+  <footer>
+    <span>Data: GitHub REST API · public repos · client-side, no auth</span>
+    <span id="updated"></span>
+  </footer>
+</div>
+
+<script>
+const OWNER = "qaintelligence";
+const REPOS = [
+  {id:"qaintelligence.github.io", name:"qaintelligence.github.io"},
+  {id:"healthcare-qa-intelligence", name:"healthcare-qa-intelligence"},
+  {id:"llm-eval-harness", name:"llm-eval-harness"},
+  {id:"api-testing-example", name:"api-testing-example"},
+  {id:"qaintelligence", name:"qaintelligence (profile)"},
+];
+const RUN_DAYS = [0,2,5]; // Sun, Tue, Fri
+const DAY_LABELS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+
+function renderDays(){
+  document.getElementById("days").innerHTML = DAY_LABELS
+    .map((d,i)=>`<span class="day${RUN_DAYS.includes(i)?" on":""}">${d}</span>`).join("");
+}
+
+function nextRun(){
+  const now = new Date();
+  for(let i=0;i<=7;i++){
+    const d = new Date(now); d.setDate(now.getDate()+i); d.setHours(11,0,0,0);
+    if(RUN_DAYS.includes(d.getDay()) && d > now){
+      return d.toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"});
+    }
+  }
+  return "—";
+}
+
+function isAI(msg){ return /co-authored-by:\s*claude/i.test(msg||""); }
+function esc(s){ return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function timeAgo(iso){
+  const d=new Date(iso), s=(Date.now()-d)/1000;
+  if(s<3600) return Math.max(1,Math.round(s/60))+"m ago";
+  if(s<86400) return Math.round(s/3600)+"h ago";
+  if(s<2592000) return Math.round(s/86400)+"d ago";
+  return d.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+}
+
+async function load(){
+  const status=document.getElementById("status");
+  const err=document.getElementById("errnote");
+  err.style.display="none";
+  status.textContent="Loading live data…";
+  document.getElementById("m-next").textContent = nextRun();
+
+  try{
+    const results = await Promise.all(REPOS.map(async r=>{
+      const res = await fetch(`https://api.github.com/repos/${OWNER}/${r.id}/commits?per_page=20`,
+        {headers:{Accept:"application/vnd.github+json"}});
+      if(!res.ok) throw new Error(`${r.id}: HTTP ${res.status}`);
+      const data = await res.json();
+      return {repo:r, commits:data};
+    }));
+
+    let all=[], total=0, ai=0;
+    const perRepo=[];
+    for(const {repo,commits} of results){
+      perRepo.push({name:repo.name, count:commits.length});
+      total += commits.length;
+      for(const c of commits){
+        const msg=c.commit.message||"";
+        const a=isAI(msg);
+        if(a) ai++;
+        all.push({
+          repo:repo.name, msg:msg.split("\n")[0],
+          date:c.commit.author.date, ai:a, url:c.html_url
+        });
+      }
+    }
+    all.sort((x,y)=>new Date(y.date)-new Date(x.date));
+
+    document.getElementById("m-commits").textContent = total;
+    document.getElementById("m-ai").textContent = ai;
+    document.getElementById("m-ai-pct").textContent =
+      total? Math.round(ai/total*100)+"% of recent commits" : "transparent trailer";
+
+    const max=Math.max(1,...perRepo.map(p=>p.count));
+    document.getElementById("bars").innerHTML = perRepo.map(p=>
+      `<div class="barrow"><span class="nm" title="${esc(p.name)}">${esc(p.name)}</span>
+        <span class="track"><span class="fill" style="width:${Math.round(p.count/max*100)}%"></span></span>
+        <span class="ct">${p.count}</span></div>`).join("");
+
+    const human=total-ai;
+    const aiPct = total? Math.round(ai/total*100):0;
+    document.getElementById("split").innerHTML =
+      (ai>0?`<div class="seg ai" style="flex:${ai}">${aiPct}%</div>`:"")+
+      (human>0?`<div class="seg hu" style="flex:${human}">${100-aiPct}%</div>`:`<div class="seg hu" style="flex:1">—</div>`);
+
+    document.getElementById("feed").innerHTML = all.slice(0,12).map(a=>
+      `<div class="item"><span class="ic">●</span>
+        <div class="body"><div class="msg"><a href="${a.url}" target="_blank" rel="noopener">${esc(a.msg)}</a></div>
+        <div class="repo">${esc(a.repo)}</div></div>
+        <div class="right"><div class="date">${timeAgo(a.date)}</div>
+        ${a.ai?'<span class="badge">AI co-authored</span>':''}</div></div>`).join("");
+
+    status.textContent = `Live · ${REPOS.length} repos · ${total} recent commits`;
+    document.getElementById("updated").textContent =
+      "Updated "+new Date().toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit"});
+  }catch(e){
+    status.textContent="Could not load live data";
+    err.style.display="block";
+    err.innerHTML = `<strong>Live data unavailable.</strong> ${esc(e.message)}. `+
+      `GitHub's unauthenticated API allows 60 requests/hour per IP — if you hit the limit, try again later. `+
+      `The agent's schedule and config above are still accurate.`;
+    document.getElementById("bars").innerHTML="";
+    document.getElementById("feed").innerHTML="";
+  }
+}
+
+renderDays();
+document.getElementById("refresh").addEventListener("click",load);
+load();
+</script>
+</body>
+</html>
